@@ -1,33 +1,792 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Quiz Application</title>
-    <style>
-        body { font-family: Arial, sans-serif; }
-        .question { margin-bottom: 20px; }
-        .options { margin: 10px 0; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Latihan Soal – Bab 1 PAI Kelas VIII</title>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --teal:#0d9488; --teal-dk:#0f766e; --teal-lt:#ccfbf1;
+    --gold:#f59e0b; --rose:#f43f5e; --green:#22c55e;
+    --ink:#1e293b; --muted:#64748b; --card:#ffffff;
+    --bg:#f0fdfa; --radius:16px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;}
+
+  header{
+    background:linear-gradient(135deg,var(--teal-dk) 0%,#134e4a 100%);
+    color:#fff;padding:28px 24px 24px;text-align:center;position:relative;overflow:hidden;
+  }
+  header::before{
+    content:'';position:absolute;inset:0;
+    background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  .badge{
+    display:inline-block;background:rgba(255,255,255,.15);
+    border:1px solid rgba(255,255,255,.3);border-radius:99px;
+    font-size:12px;font-weight:700;letter-spacing:1px;
+    text-transform:uppercase;padding:4px 14px;margin-bottom:10px;
+  }
+  header h1{font-size:clamp(16px,4vw,24px);font-weight:900;line-height:1.3;position:relative;}
+  header p{font-size:14px;opacity:.8;margin-top:6px;position:relative;}
+  .shuffle-note{font-size:11px;opacity:.6;margin-top:2px;font-style:italic;}
+
+  .container{max-width:760px;margin:0 auto;padding:0 16px 40px;}
+
+  .identity-card{
+    background:var(--card);border-radius:var(--radius);
+    box-shadow:0 4px 24px rgba(0,0,0,.08);
+    padding:24px;margin-top:-20px;position:relative;z-index:2;
+  }
+  .identity-card h2{font-size:18px;font-weight:900;color:var(--teal-dk);margin-bottom:4px;}
+  .identity-card .sub{font-size:13px;color:var(--muted);margin-bottom:16px;}
+  .input-row{display:flex;gap:12px;flex-wrap:wrap;}
+  .input-group{flex:1;min-width:200px;}
+  .input-group label{
+    display:block;font-size:12px;font-weight:800;
+    color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;
+  }
+  .input-group input{
+    width:100%;padding:11px 14px;border:2px solid #e2e8f0;
+    border-radius:10px;font-family:'Nunito',sans-serif;
+    font-size:15px;font-weight:600;color:var(--ink);
+    transition:border-color .2s;background:#f8fafc;
+  }
+  .input-group input:focus{
+    outline:none;border-color:var(--teal);background:#fff;
+    box-shadow:0 0 0 3px rgba(13,148,136,.12);
+  }
+  .input-group input::placeholder{color:#94a3b8;font-weight:600;}
+
+  .progress-sticky{
+    position:sticky;top:0;z-index:10;
+    background:rgba(240,253,250,.92);backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+    padding:14px 0 10px;margin-top:20px;
+    border-bottom:1px solid rgba(13,148,136,.1);
+  }
+  .prog-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+  .prog-label{font-size:13px;font-weight:800;color:var(--muted);}
+  .prog-chips{display:flex;gap:6px;}
+  .prog-chip{font-size:12px;font-weight:800;padding:3px 10px;border-radius:99px;}
+  .prog-chip.cg{background:#f0fdf4;color:var(--green);}
+  .prog-chip.cr{background:#fff1f2;color:var(--rose);}
+  .prog-bar{height:8px;background:#e2e8f0;border-radius:99px;overflow:hidden;}
+  .prog-fill{
+    height:100%;border-radius:99px;
+    background:linear-gradient(90deg,var(--teal),var(--gold));
+    transition:width .5s cubic-bezier(.4,0,.2,1);
+  }
+  .show-result-btn{
+    display:none;margin-top:8px;
+    padding:8px 16px;border-radius:8px;
+    background:var(--teal);color:#fff;
+    font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;
+    border:none;cursor:pointer;transition:all .2s;
+  }
+  .show-result-btn:hover{background:var(--teal-dk);}
+
+  .q-card{
+    background:var(--card);border-radius:var(--radius);
+    box-shadow:0 2px 16px rgba(0,0,0,.06);
+    margin-top:16px;padding:22px 24px;
+    border-left:4px solid var(--teal);
+  }
+  .q-card[data-type="Pemahaman"]{border-left-color:#0284c7;}
+  .q-card[data-type="Penerapan & Analisis"]{border-left-color:var(--gold);}
+  .q-card.answered-correct{border-left-color:var(--green);}
+  .q-card.answered-wrong{border-left-color:var(--rose);}
+
+  .q-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px;}
+  .q-type-badge{
+    font-size:10px;font-weight:800;letter-spacing:.8px;
+    text-transform:uppercase;padding:3px 10px;border-radius:6px;
+  }
+  .q-type-badge.t-hafalan{background:var(--teal-lt);color:var(--teal-dk);}
+  .q-type-badge.t-pemahaman{background:#e0f2fe;color:#0369a1;}
+  .q-type-badge.t-penerapan{background:#fef3c7;color:#92400e;}
+  .q-num{font-size:12px;font-weight:700;color:var(--muted);}
+  .q-text{font-size:15px;font-weight:700;line-height:1.65;white-space:pre-line;margin-bottom:16px;}
+  .q-arabic{
+    font-family:'Amiri',serif;font-size:22px;direction:rtl;text-align:right;
+    line-height:2.2;color:var(--teal-dk);background:var(--teal-lt);
+    border-radius:10px;padding:12px 18px;margin-bottom:16px;
+  }
+
+  .q-options{display:flex;flex-direction:column;gap:8px;}
+  .opt-btn{
+    display:flex;align-items:flex-start;gap:12px;
+    background:#f8fafc;border:2px solid #e2e8f0;border-radius:10px;
+    padding:11px 14px;cursor:pointer;
+    font-family:'Nunito',sans-serif;font-size:14px;font-weight:600;
+    text-align:left;transition:all .2s;width:100%;
+  }
+  .opt-btn:hover:not(:disabled){border-color:var(--teal);background:var(--teal-lt);transform:translateX(3px);}
+  .opt-label{
+    min-width:26px;height:26px;background:#e2e8f0;border-radius:7px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:12px;font-weight:800;color:var(--muted);flex-shrink:0;transition:all .2s;
+  }
+  .opt-btn.correct{border-color:var(--green);background:#f0fdf4;}
+  .opt-btn.correct .opt-label{background:var(--green);color:#fff;}
+  .opt-btn.wrong{border-color:var(--rose);background:#fff1f2;}
+  .opt-btn.wrong .opt-label{background:var(--rose);color:#fff;}
+  .opt-btn.dimmed{opacity:.5;}
+  .opt-btn:disabled{cursor:default;}
+
+  .q-feedback{
+    display:none;margin-top:14px;border-radius:10px;
+    padding:12px 16px;font-size:13px;line-height:1.65;
+  }
+  .q-feedback.show{display:block;animation:slideUp .3s ease;}
+  .q-feedback.fb-correct{background:#f0fdf4;border-left:4px solid var(--green);}
+  .q-feedback.fb-wrong{background:#fff1f2;border-left:4px solid var(--rose);}
+  .q-feedback strong{display:block;font-size:14px;margin-bottom:3px;}
+  @keyframes slideUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+
+  .result-overlay{
+    display:none;position:fixed;inset:0;z-index:100;
+    background:rgba(15,23,42,.6);backdrop-filter:blur(6px);
+    -webkit-backdrop-filter:blur(6px);
+    justify-content:center;align-items:center;padding:20px;
+  }
+  .result-overlay.show{display:flex;animation:fadeIn .4s ease;}
+  @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+
+  .result-modal{
+    background:var(--card);border-radius:20px;
+    box-shadow:0 24px 64px rgba(0,0,0,.2);
+    max-width:480px;width:100%;padding:36px 28px;
+    text-align:center;position:relative;overflow:hidden;
+    animation:modalPop .4s cubic-bezier(.2,.8,.3,1.2);
+  }
+  @keyframes modalPop{from{opacity:0;transform:scale(.85) translateY(30px);}to{opacity:1;transform:none;}}
+
+  .result-modal .confetti-container{position:absolute;inset:0;pointer-events:none;overflow:hidden;}
+  .confetti{
+    position:absolute;top:-10px;opacity:0;
+    animation:confettiFall linear forwards;
+  }
+  @keyframes confettiFall{
+    0%{opacity:1;transform:translateY(0) rotate(0deg) scale(1);}
+    80%{opacity:1;}
+    100%{opacity:0;transform:translateY(420px) rotate(720deg) scale(.5);}
+  }
+
+  .r-emoji{font-size:56px;position:relative;}
+  .r-greeting{font-size:14px;color:var(--muted);margin-top:12px;font-weight:700;}
+  .r-name{font-size:24px;font-weight:900;color:var(--ink);margin:4px 0 0;}
+  .r-class{font-size:13px;color:var(--teal);font-weight:700;margin-bottom:20px;}
+  .r-score-wrap{
+    background:var(--bg);border-radius:14px;padding:20px;margin-bottom:20px;
+  }
+  .r-score-label{font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
+  .r-score{font-size:52px;font-weight:900;color:var(--teal);line-height:1.1;}
+  .r-score span{font-size:20px;font-weight:700;color:var(--muted);}
+  .r-stats{display:flex;gap:10px;justify-content:center;margin-top:14px;}
+  .r-stat{
+    background:#fff;border-radius:10px;padding:10px 16px;
+    font-size:12px;font-weight:700;color:var(--muted);
+  }
+  .r-stat b{display:block;font-size:20px;font-weight:900;}
+  .r-stat.sg b{color:var(--green);}
+  .r-stat.sr b{color:var(--rose);}
+
+  .r-predikat{
+    display:inline-block;padding:6px 20px;border-radius:99px;
+    font-weight:800;font-size:14px;margin-bottom:16px;
+  }
+  .r-motivasi{
+    font-size:14px;line-height:1.7;color:var(--muted);
+    background:#f8fafc;border-radius:12px;padding:14px 18px;
+    margin-bottom:24px;text-align:left;
+  }
+  .r-motivasi strong{color:var(--ink);}
+
+  .r-btns{display:flex;flex-direction:column;gap:10px;}
+  .btn{
+    padding:13px 24px;border-radius:12px;font-family:'Nunito',sans-serif;
+    font-size:15px;font-weight:800;border:none;cursor:pointer;transition:all .2s;
+  }
+  .btn-primary{background:var(--teal);color:#fff;box-shadow:0 4px 12px rgba(13,148,136,.3);}
+  .btn-primary:hover{background:var(--teal-dk);transform:translateY(-2px);}
+  .btn-outline{background:transparent;color:var(--muted);border:2px solid #e2e8f0;}
+  .btn-outline:hover{border-color:var(--teal);color:var(--teal);}
+
+  .dist-bar{
+    display:flex;height:6px;border-radius:99px;overflow:hidden;
+    margin-top:20px;gap:2px;
+  }
+  .dist-bar div{height:100%;border-radius:99px;transition:width .4s;}
+  .dist-legend{
+    display:flex;justify-content:center;gap:12px;margin-top:6px;
+    font-size:11px;font-weight:800;color:var(--muted);
+  }
+  .dist-legend span{display:flex;align-items:center;gap:3px;}
+  .dist-legend i{width:8px;height:8px;border-radius:50%;display:inline-block;}
+
+  @media(max-width:500px){
+    .q-card{padding:16px 14px;}
+    .opt-btn{padding:10px 12px;font-size:13px;}
+    .result-modal{padding:28px 20px;}
+    .r-score{font-size:42px;}
+    .identity-card{padding:18px 16px;}
+  }
+</style>
 </head>
 <body>
-    <h1>Interactive Quiz Application</h1>
-    <div class="question">
-        <h2>Question 1: What is the capital of France?</h2>
-        <div class="options">
-            <button onclick="checkAnswer('A')">A) London</button>
-            <button onclick="checkAnswer('B')">B) Paris</button>
-            <button onclick="checkAnswer('C')">C) Rome</button>
-        </div>
+
+<header>
+  <div class="badge">PAI & Budi Pekerti · SMP Kelas VIII</div>
+  <h1>📖 Latihan Soal Bab 1<br>Inspirasi Al-Qur'an: Melestarikan Alam, Menjaga Kehidupan</h1>
+  <p>25 soal pilihan ganda · Semua soal ditampilkan sekaligus</p>
+  <p class="shuffle-note">🔄 Urutan soal diacak setiap kali membuka halaman</p>
+</header>
+
+<div class="container">
+  <section class="identity-card">
+    <h2>📝 Data Peserta</h2>
+    <p class="sub">Isi nama dan kelas sebelum mengerjakan soal</p>
+    <div class="input-row">
+      <div class="input-group">
+        <label for="inp-nama">Nama Lengkap</label>
+        <input type="text" id="inp-nama" placeholder="Masukkan nama lengkap...">
+      </div>
+      <div class="input-group">
+        <label for="inp-kelas">Kelas</label>
+        <input type="text" id="inp-kelas" placeholder="Contoh: VIII-A">
+      </div>
     </div>
-    <script>
-        function checkAnswer(option) {
-            if (option === 'B') {
-                alert('Correct Answer!');
-            } else {
-                alert('Wrong Answer!');
-            }
+  </section>
+
+  <div class="progress-sticky">
+    <div class="prog-top">
+      <span class="prog-label" id="prog-label">0 dari 25 soal dijawab</span>
+      <div class="prog-chips">
+        <span class="prog-chip cg" id="chip-g">✅ 0</span>
+        <span class="prog-chip cr" id="chip-r">❌ 0</span>
+      </div>
+    </div>
+    <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+    <button class="show-result-btn" id="btn-show-result" onclick="openResult()">🎉 Lihat Hasil</button>
+  </div>
+
+  <div id="questions-container"></div>
+
+  <div style="margin-top:24px;">
+    <div class="dist-bar" id="dist-bar"></div>
+    <div class="dist-legend">
+      <span><i style="background:var(--teal)"></i>A</span>
+      <span><i style="background:#0284c7"></i>B</span>
+      <span><i style="background:var(--gold)"></i>C</span>
+      <span><i style="background:var(--rose)"></i>D</span>
+      <span><i style="background:#8b5cf6"></i>E</span>
+    </div>
+  </div>
+</div>
+
+<div class="result-overlay" id="result-overlay">
+  <div class="result-modal">
+    <div class="confetti-container" id="confetti-box"></div>
+    <div class="r-emoji" id="r-emoji"></div>
+    <div class="r-greeting">Selamat!</div>
+    <div class="r-name" id="r-name"></div>
+    <div class="r-class" id="r-class"></div>
+    <div class="r-score-wrap">
+      <div class="r-score-label">Skor Kamu</div>
+      <div class="r-score"><span id="r-score"></span><span>/100</span></div>
+      <div class="r-stats">
+        <div class="r-stat sg"><b id="r-correct">0</b>Benar</div>
+        <div class="r-stat sr"><b id="r-wrong">0</b>Salah</div>
+      </div>
+    </div>
+    <div class="r-predikat" id="r-predikat"></div>
+    <div class="r-motivasi" id="r-motivasi"></div>
+    <div class="r-btns">
+      <button class="btn btn-outline" onclick="closeResult()">Tinjau Jawaban Saya</button>
+      <button class="btn btn-primary" onclick="restart()">🔁 Ulangi Latihan</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// DATA SOAL — kunci jawaban sudah diseimbangkan:
+// A=5, B=5, C=5, D=5, E=5 dengan pola A,B,C,D,E berulang
+// sehingga TIDAK ADA dua soal berurutan jawabannya sama
+// ═══════════════════════════════════════════════════════
+const questions = [
+  // ── Soal 1 → Jawaban A ──
+  {
+    type:"Hafalan & Ingatan",
+    text:"Ayat yang mengandung pesan bahwa telah tampak kerusakan di darat dan di laut akibat perbuatan tangan manusia terdapat dalam surah...",
+    options:["Q.S. ar-Rum/30:41","Q.S. al-Baqarah/2:30","Q.S. Ibrahim/14:32","Q.S. az-Zukhruf/43:13","Q.S. al-A'raf/7:56"],
+    answer:0,
+    explanation:"Q.S. ar-Rum/30:41 berbunyi 'Telah tampak kerusakan di darat dan di laut disebabkan karena perbuatan tangan manusia; Allah menghendaki agar mereka merasakan sebagian dari akibat perbuatan mereka, agar mereka kembali ke jalan yang benar.'"
+  },
+  // ── Soal 2 → Jawaban B ──
+  {
+    type:"Hafalan & Ingatan",
+    text:"Dalam Q.S. Ibrahim/14:32, Allah menyebutkan beberapa nikmat yang telah ditundukkan untuk manusia. Manakah yang BUKAN termasuk isi kandungan ayat tersebut?",
+    options:["Allah menurunkan air hujan dari langit","Allah menundukkan gunung-gunung sebagai pasak bumi","Allah menundukkan kapal agar berlayar di lautan","Allah menundukkan sungai-sungai","Allah mengeluarkan buah-buahan sebagai rezeki"],
+    answer:1,
+    explanation:"Q.S. Ibrahim/14:32 menyebutkan: penciptaan langit dan bumi, hujan dari langit, buah-buahan sebagai rezeki, kapal berlayar di lautan, dan sungai-sungai. Gunung sebagai pasak bumi disebutkan di surah lain (Q.S. an-Naba'/78:7)."
+  },
+  // ── Soal 3 → Jawaban C ──
+  {
+    type:"Hafalan & Ingatan",
+    text:"Hadis riwayat H.R. al-Bukhari yang dipelajari di Bab 1 diriwayatkan oleh sahabat nabi yang bernama...",
+    options:["Abu Hurairah r.a.","Abdullah bin Umar r.a.","Anas bin Malik r.a.","Ali bin Abi Thalib r.a.","Usman bin Affan r.a."],
+    answer:2,
+    explanation:"Hadis tentang menanam pohon yang pahalanya menjadi sedekah diriwayatkan oleh Anas bin Malik r.a. Dalam hadis ini Rasulullah saw. bersabda bahwa tidaklah seorang muslim menanam pohon kemudian pohon itu dimakan burung, manusia, atau binatang, melainkan menjadi sedekah baginya."
+  },
+  // ── Soal 4 → Jawaban D ──
+  {
+    type:"Hafalan & Ingatan",
+    text:"Lam jalālah dibaca tafkhīm (tebal) apabila berada pada posisi berikut, KECUALI...",
+    options:["Di awal kalimat","Setelah harakat fatah","Setelah harakat damah","Setelah harakat kasrah","Semua pilihan di atas benar"],
+    answer:3,
+    explanation:"Lam jalālah dibaca tafkhīm (tebal) jika berada: (1) di awal kalimat, (2) setelah harakat fatah, atau (3) setelah harakat damah. Jika berada setelah harakat kasrah, lam jalālah dibaca tarqīq (tipis)."
+  },
+  // ── Soal 5 → Jawaban E ──
+  {
+    type:"Hafalan & Ingatan",
+    text:"Huruf ra dibaca tarqīq (tipis) apabila...",
+    options:["Berharakat fatah","Berharakat damah","Sukun didahului harakat fatah","Sukun didahului harakat damah","Berharakat kasrah"],
+    answer:4,
+    explanation:"Huruf ra dibaca tarqīq apabila: (1) berharakat kasrah, atau (2) sukun yang didahului huruf berharakat kasrah. Sedangkan ra dibaca tafkhīm apabila berharakat fatah, damah, sukun didahului fatah, atau sukun didahului damah."
+  },
+  // ── Soal 6 → Jawaban A ──
+  {
+    type:"Hafalan & Ingatan",
+    text:"Q.S. az-Zukhruf/43:13 menjelaskan tentang...",
+    options:["Allah menundukkan binatang sebagai sarana transportasi manusia","Larangan merusak alam semesta","Kewajiban menjaga kelestarian laut","Allah menciptakan langit dan bumi untuk manusia","Anjuran menanam pohon sebagai sedekah jariyah"],
+    answer:0,
+    explanation:"Q.S. az-Zukhruf/43:13 berisi tentang Allah yang menundukkan (binatang tunggangan) bagi manusia, sehingga manusia bisa duduk di atasnya dan mengingat nikmat Allah, serta mengucapkan tasbih 'Maha Suci Allah yang telah menundukkan semua ini bagi kami.'"
+  },
+  // ── Soal 7 → Jawaban B ──
+  {
+    type:"Hafalan & Ingatan",
+    text:"Ilmu yang mempelajari cara membunyikan atau melafalkan huruf-huruf dalam Al-Qur'an dengan benar disebut...",
+    options:["Ilmu Nahwu","Ilmu Tajwid","Ilmu Sharaf","Ilmu Balaghah","Ilmu Tafsir"],
+    answer:1,
+    explanation:"Ilmu Tajwid adalah ilmu yang mempelajari tentang cara membunyikan atau melafalkan huruf-huruf yang terdapat dalam Al-Qur'an dengan benar. Dengan mempelajari ilmu tajwid, kita dapat membaca Al-Qur'an dengan fasih dan benar."
+  },
+  // ── Soal 8 → Jawaban C ──
+  {
+    type:"Hafalan & Ingatan",
+    text:"Kata kunci (tema utama) yang menjadi fokus Bab 1 buku PAI Kelas VIII ini adalah...",
+    options:["Bertauhid, Bersyukur, dan Beribadah","Membaca, Menghafal, dan Memahami Al-Qur'an","Melestarikan Alam, Menjaga Lingkungan, dan Menjaga Kehidupan","Jujur, Amanah, dan Bertanggung Jawab","Toleransi, Harmoni, dan Persatuan"],
+    answer:2,
+    explanation:"Kata kunci (Titik Fokus) Bab 1 adalah 'Melestarikan Alam, Menjaga Lingkungan, Menjaga Kehidupan.' Ketiganya merupakan tema besar yang dibahas melalui Q.S. ar-Rum/30:41, Ibrahim/14:32, az-Zukhruf/43:13, dan hadis H.R. al-Bukhari."
+  },
+  // ── Soal 9 → Jawaban D ──
+  {
+    type:"Pemahaman",
+    text:"Menurut Q.S. ar-Rum/30:41, kerusakan yang terjadi di darat dan di laut disebabkan oleh...",
+    options:["Kehendak Allah sebagai ujian bagi manusia","Bencana alam yang tidak bisa dihindari","Ulah makhluk halus yang jahat","Perbuatan tangan manusia itu sendiri","Ketidakseimbangan ekosistem secara alami"],
+    answer:3,
+    explanation:"Q.S. ar-Rum/30:41 dengan jelas menyatakan bahwa kerusakan di darat dan laut terjadi 'disebabkan karena perbuatan tangan manusia.' Ini menunjukkan bahwa manusialah yang bertanggung jawab atas kerusakan alam."
+  },
+  // ── Soal 10 → Jawaban E ──
+  {
+    type:"Pemahaman",
+    text:"Tujuan Allah memperlihatkan sebagian akibat dari perbuatan manusia yang merusak alam (sesuai Q.S. ar-Rum/30:41) adalah agar...",
+    options:["Manusia takut kepada kekuasaan Allah","Manusia menjadi lemah dan tidak berdaya","Manusia berlomba-lomba memperbaiki teknologi","Allah membuktikan kekuasaan-Nya","Manusia menyadari kesalahannya dan kembali ke jalan yang benar"],
+    answer:4,
+    explanation:"Q.S. ar-Rum/30:41 menyebutkan 'agar mereka merasakan sebagian dari akibat perbuatan mereka, agar mereka kembali (ke jalan yang benar).' Jadi tujuannya adalah agar manusia sadar dan bertobat, lalu memperbaiki perilakunya terhadap alam."
+  },
+  // ── Soal 11 → Jawaban A ──
+  {
+    type:"Pemahaman",
+    text:"Berdasarkan kandungan Q.S. Ibrahim/14:32, bentuk syukur yang tepat atas nikmat alam yang Allah berikan adalah...",
+    options:["Menjaga dan melestarikan alam serta mendirikan shalat","Memanfaatkan alam sebesar-besarnya untuk kepentingan pribadi","Mengeksploitasi sumber daya alam untuk kemakmuran negara","Cukup mengucapkan Alhamdulillah setiap hari","Membiarkan alam berkembang tanpa campur tangan manusia"],
+    answer:0,
+    explanation:"Q.S. Ibrahim/14:32 mengajarkan bahwa Allah telah memberikan berbagai nikmat alam. Sebagai bentuk syukur, manusia wajib mendirikan shalat dan memperhatikan keberlangsungan kehidupan orang lain, sekaligus menjaga alam yang telah dianugerahkan."
+  },
+  // ── Soal 12 → Jawaban B ──
+  {
+    type:"Pemahaman",
+    text:"Bacaan tafkhīm berarti membunyikan huruf dengan cara...",
+    options:["Suara tipis dengan bibir agak mundur","Suara tebal dengan bibir menjorok ke depan","Suara panjang dan berdengung","Suara pendek dan terputus","Suara sedang tanpa penekanan"],
+    answer:1,
+    explanation:"Tafkhīm adalah membunyikan huruf dengan suara atau bacaan tebal. Cara membacanya: mengucapkan huruf di bibir sambil menjorokkan ke depan. Kebalikannya adalah tarqīq (tipis) yang dibaca dengan bibir agak mundur."
+  },
+  // ── Soal 13 → Jawaban C ──
+  {
+    type:"Pemahaman",
+    text:"Makna 'Ṭalab Al-Ilmi' sebagai nama rubrik dalam buku PAI ini adalah...",
+    options:["Permintaan maaf kepada guru","Diskusi kelompok tentang materi","Upaya mencari/menuntut ilmu","Evaluasi hasil belajar","Rangkuman akhir bab"],
+    answer:2,
+    explanation:"Ṭalab Al-'Ilm berasal dari bahasa Arab yang berarti 'menuntut ilmu' atau 'mencari ilmu.' Rubrik ini berisi materi inti (isi pelajaran) yang merupakan sarana peserta didik untuk menuntut ilmu dalam setiap bab."
+  },
+  // ── Soal 14 → Jawaban D ──
+  {
+    type:"Pemahaman",
+    text:"Menurut H.R. al-Bukhari yang dipelajari di Bab 1, jika seorang muslim menanam pohon dan pohon itu dimakan burung, manusia, atau binatang, maka hal itu bernilai...",
+    options:["Dosa, karena menyia-nyiakan hasil tanaman","Pahala khusus hanya jika niatnya ibadah","Tidak ada nilai apa pun kecuali niat yang baik","Sedekah bagi orang yang menanamnya","Kewajiban yang harus ditunaikan setiap muslim"],
+    answer:3,
+    explanation:"Hadis H.R. al-Bukhari dari Anas bin Malik r.a. menyebutkan bahwa Rasulullah saw. bersabda: tidaklah seorang muslim menanam pohon atau tanaman, kemudian dimakan oleh burung, manusia, atau binatang, melainkan menjadi sedekah baginya."
+  },
+  // ── Soal 15 → Jawaban E ──
+  {
+    type:"Pemahaman",
+    text:"Perbedaan antara lam jalālah yang dibaca tafkhīm dan tarqīq terletak pada...",
+    options:["Panjang pendeknya bacaan","Jenis surah tempat lafal Allah berada","Posisi lam di awal, tengah, atau akhir ayat","Banyak sedikitnya lam dalam satu kalimat","Harakat yang ada sebelum lam jalālah"],
+    answer:4,
+    explanation:"Penentu bacaan lam jalālah adalah harakat yang ada sebelumnya: jika sebelumnya fatah atau damah (atau di awal kalimat) → tafkhīm (tebal). Jika sebelumnya kasrah → tarqīq (tipis)."
+  },
+  // ── Soal 16 → Jawaban A ──
+  {
+    type:"Pemahaman",
+    text:"Dalam konteks bab ini, mengapa Islam sangat peduli terhadap kelestarian lingkungan?",
+    options:["Karena alam adalah ciptaan Allah yang merupakan nikmat dan amanah bagi manusia","Karena lingkungan adalah milik negara yang harus dijaga bersama","Karena kerusakan alam hanya merugikan manusia secara ekonomi","Karena Islam mengikuti aturan internasional tentang lingkungan hidup","Karena ilmuwan muslim membuktikan pentingnya ekologi"],
+    answer:0,
+    explanation:"Islam peduli terhadap kelestarian alam karena alam adalah ciptaan Allah yang merupakan nikmat dan amanah bagi manusia. Manusia wajib bersyukur dengan cara menjaga dan melestarikannya."
+  },
+  // ── Soal 17 → Jawaban B ──
+  {
+    type:"Pemahaman",
+    text:"Urutan langkah belajar Al-Qur'an yang benar menurut sistematika Bab 1 adalah...",
+    options:["Menghafal → Membaca → Menerjemahkan → Memahami kandungan","Membaca → Menulis & Menghafal → Menerjemahkan → Memahami kandungan","Memahami kandungan → Menerjemahkan → Membaca → Menghafal","Menerjemahkan → Membaca → Menghafal → Memahami kandungan","Menulis → Membaca → Memahami → Mengamalkan"],
+    answer:1,
+    explanation:"Bab 1 menyajikan empat tahap belajar Al-Qur'an secara berurutan: (1) Belajar Membaca dengan fasih, (2) Belajar Menulis dan Menghafal, (3) Belajar Menerjemahkan, (4) Belajar Memahami Kandungan Ayat."
+  },
+  // ── Soal 18 → Jawaban C ──
+  {
+    type:"Pemahaman",
+    text:"Perhatikan potongan ayat berikut!\n\nليذيقهم بعض الذي عملوا لعلهم يرجعون\n\nMakna potongan ayat Q.S. ar-Rum/30:41 ini adalah...",
+    options:["Allah menciptakan bumi agar manusia bisa memanfaatkannya","Allah menyuruh manusia menanam pohon di mana saja","Allah menginginkan manusia merasakan akibat perbuatannya agar kembali ke jalan benar","Allah menundukkan alam bagi manusia sebagai nikmat-Nya","Allah melarang manusia merusak sumber daya air"],
+    answer:2,
+    explanation:"Potongan ayat tersebut berarti 'agar Dia merasakan kepada mereka sebagian dari (akibat) perbuatan mereka, agar mereka kembali (ke jalan yang benar).'",
+    arabic:"لِيُذِيقَهُم بَعْضَ الَّذِي عَمِلُوا لَعَلَّهُمْ يَرْجِعُونَ"
+  },
+  // ── Soal 19 → Jawaban D ──
+  {
+    type:"Penerapan & Analisis",
+    text:"Dua remaja asal Bali, Melati dan Isabel Wijsen, mendirikan gerakan Bye Bye Plastic Bags. Tindakan mereka paling mencerminkan kandungan ayat...",
+    options:["Q.S. az-Zukhruf/43:13 tentang mensyukuri nikmat transportasi","Q.S. al-Baqarah/2:155 tentang kesabaran menghadapi ujian","Q.S. al-Maidah/5:2 tentang tolong-menolong dalam kebaikan","Q.S. ar-Rum/30:41 dan H.R. al-Bukhari tentang kepedulian melestarikan alam","Q.S. Ibrahim/14:7 tentang bersyukur agar nikmat ditambah"],
+    answer:3,
+    explanation:"Gerakan Bye Bye Plastic Bags Bali merupakan aksi nyata melawan kerusakan alam akibat sampah plastik. Ini selaras dengan Q.S. ar-Rum/30:41 dan hadis H.R. al-Bukhari."
+  },
+  // ── Soal 20 → Jawaban E ──
+  {
+    type:"Penerapan & Analisis",
+    text:"Seorang siswa rajin membuang sampah pada tempatnya dan aktif dalam program penghijauan sekolah. Perilaku ini paling sesuai dengan pesan...",
+    options:["Q.S. az-Zukhruf/43:13 saja","Q.S. Ibrahim/14:32 tentang menaiki kapal","Hanya hadis H.R. al-Bukhari, bukan Al-Qur'an","Tidak ada kaitannya dengan materi Bab 1","Q.S. ar-Rum/30:41 dan H.R. al-Bukhari"],
+    answer:4,
+    explanation:"Membuang sampah pada tempatnya = menjaga alam dari kerusakan (Q.S. ar-Rum/30:41). Aktif penghijauan = bernilai sedekah (H.R. al-Bukhari). Keduanya merupakan wujud nyata pesan Bab 1."
+  },
+  // ── Soal 21 → Jawaban A ──
+  {
+    type:"Penerapan & Analisis",
+    text:"Banjir, tanah longsor, dan pemanasan global yang semakin parah saat ini, menurut kandungan Q.S. ar-Rum/30:41, terutama disebabkan oleh...",
+    options:["Perilaku eksploitatif manusia terhadap alam","Takdir Allah yang tidak bisa dihindari","Siklus alam yang berjalan secara normal","Pengaruh cuaca dari luar angkasa","Kutukan Allah kepada bangsa yang ingkar"],
+    answer:0,
+    explanation:"Ayat ar-Rum/30:41 menegaskan kerusakan di darat dan laut terjadi 'bima kasabat aydin nas' – karena perbuatan tangan manusia."
+  },
+  // ── Soal 22 → Jawaban B ──
+  {
+    type:"Penerapan & Analisis",
+    text:"Ketika membaca lafal الله dalam potongan 'بِسْمِ اللهِ', cara membaca lam jalālahnya adalah...",
+    options:["Tafkhīm, karena berada di awal kalimat","Tarqīq, karena didahului harakat kasrah pada huruf sebelumnya","Tafkhīm, karena selalu dibaca tebal di mana saja","Tarqīq, karena terletak di tengah kalimat","Tafkhīm, karena sebelumnya berharakat fatah"],
+    answer:1,
+    explanation:"Dalam 'بِسْمِ اللهِ', huruf mim pada 'بِسْمِ' berharakat kasrah. Karena lam jalālah berada setelah huruf yang berharakat kasrah, maka dibaca tarqīq (tipis)."
+  },
+  // ── Soal 23 → Jawaban C ──
+  {
+    type:"Penerapan & Analisis",
+    text:"Rangkuman Bab 1 menyebutkan tiga poin utama. Manakah yang paling tepat merangkum isi ketiga poin tersebut?",
+    options:["Manusia wajib berjihad melindungi alam dari penjajahan asing","Menanam pohon adalah ibadah wajib bagi setiap muslim","Kerusakan alam akibat ulah manusia, alam adalah nikmat yang harus disyukuri dengan melestarikannya, dan pelajar muslim harus aktif menjaga alam","Al-Qur'an hanya mengatur urusan ibadah, bukan lingkungan hidup","Kelestarian alam adalah tanggung jawab pemerintah semata"],
+    answer:2,
+    explanation:"Tiga poin rangkuman: (1) Kerusakan alam karena perilaku eksploitatif manusia. (2) Alam adalah nikmat yang harus disyukuri dengan melestarikannya. (3) Pelajar muslim harus berpartisipasi aktif menjaga alam."
+  },
+  // ── Soal 24 → Jawaban D ──
+  {
+    type:"Penerapan & Analisis",
+    text:"Nilai Profil Pelajar Pancasila manakah yang paling relevan dengan sikap melestarikan alam sebagaimana diajarkan dalam Bab 1?",
+    options:["Bernalar kritis dan mandiri saja","Berkebinekaan global saja","Kreatif dan mandiri saja","Beriman, bertakwa, berakhlak mulia; bergotong royong; dan bernalar kritis","Semua dimensi Pelajar Pancasila tidak relevan dengan pelestarian alam"],
+    answer:3,
+    explanation:"Melestarikan alam mencerminkan: Beriman dan berakhlak mulia, Bergotong royong, dan Bernalar kritis. Ini selaras dengan rubrik 'Aku Pelajar Pancasila' di Bab 1."
+  },
+  // ── Soal 25 → Jawaban E ──
+  {
+    type:"Penerapan & Analisis",
+    text:"Seorang petani muslim rutin menanam padi. Hasil panennya sebagian dimakan tikus sawah, sebagian lagi dimakan burung, dan sisanya untuk keluarganya. Berdasarkan hadis H.R. al-Bukhari dalam Bab 1, apa yang bisa disimpulkan?",
+    options:["Petani itu rugi karena hasilnya habis dimakan hewan","Hanya bagian yang dimakan manusia yang bernilai sedekah","Hadis ini tidak berlaku untuk hasil pertanian, hanya untuk pohon","Petani itu perlu mengusir semua hewan agar pahalanya penuh","Bagian yang dimakan tikus dan burung tetap bernilai sedekah bagi petani itu"],
+    answer:4,
+    explanation:"Hadis H.R. al-Bukhari menyebutkan: 'tidaklah seorang muslim menanam pohon, tidak pula menanam tanaman, kemudian dimakan oleh burung, manusia, atau binatang, melainkan menjadi sedekah baginya.'"
+  }
+];
+
+// ═══════════════════════════════════════════════════════
+// ALGORITMA ACAK SOAL — Fisher-Yates + penjamin tidak ada
+// jawaban berurutan yang sama
+// ═══════════════════════════════════════════════════════
+function shuffleNoAdjacent(arr) {
+  // Langkah 1: Acak dengan Fisher-Yates
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+
+  // Langkah 2: Perbaiki jika ada jawaban berurutan sama
+  // Ulangi beberapa kali sampai bersih
+  for (let pass = 0; pass < 500; pass++) {
+    let clean = true;
+    for (let i = 0; i < arr.length - 1; i++) {
+      if (arr[i].answer === arr[i + 1].answer) {
+        clean = false;
+        let swapped = false;
+
+        // Cari kandidat swap setelah posisi i+1
+        for (let k = i + 2; k < arr.length; k++) {
+          const ansK = arr[k].answer;
+          const ansBefore = (i > 0) ? arr[i - 1].answer : -1;
+          const ansAfter = (k < arr.length - 1) ? arr[k + 1].answer : -1;
+          // Pastikan setelah swap tidak timbul konflik baru
+          if (ansK !== arr[i].answer && ansK !== ansAfter && ansK !== ansBefore) {
+            [arr[i + 1], arr[k]] = [arr[k], arr[i + 1]];
+            swapped = true;
+            break;
+          }
         }
-    </script>
+
+        // Jika belum bisa, coba swap posisi i dengan posisi setelahnya
+        if (!swapped) {
+          for (let k = i + 2; k < arr.length; k++) {
+            const ansK = arr[k].answer;
+            const ansBefore = (i > 0) ? arr[i - 1].answer : -1;
+            const ansAfterI = arr[i + 1].answer;
+            const ansAfterK = (k < arr.length - 1) ? arr[k + 1].answer : -1;
+            if (ansK !== ansAfterI && ansK !== ansBefore &&
+                arr[i].answer !== ansAfterK && arr[i].answer !== ansBefore) {
+              [arr[i], arr[k]] = [arr[k], arr[i]];
+              swapped = true;
+              break;
+            }
+          }
+        }
+      }
+    }
+    if (clean) break;
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+let scoreCorrect = 0;
+let scoreWrong = 0;
+let answered = [];
+
+// ═══════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════
+function typeClass(type) {
+  if (type.includes("Hafalan")) return "t-hafalan";
+  if (type.includes("Pemahaman")) return "t-pemahaman";
+  return "t-penerapan";
+}
+
+function renderAll() {
+  const box = document.getElementById("questions-container");
+  const labels = ["A", "B", "C", "D", "E"];
+  let html = "";
+
+  questions.forEach((q, i) => {
+    html += `<div class="q-card" id="qcard-${i}" data-type="${q.type}">`;
+    html += `<div class="q-header">
+      <span class="q-type-badge ${typeClass(q.type)}">${q.type}</span>
+      <span class="q-num">Soal ${i + 1} dari ${questions.length}</span>
+    </div>`;
+    html += `<div class="q-text">${q.text}</div>`;
+    if (q.arabic) html += `<div class="q-arabic">${q.arabic}</div>`;
+    html += `<div class="q-options" id="opts-${i}">`;
+    q.options.forEach((opt, j) => {
+      html += `<button class="opt-btn" id="opt-${i}-${j}" onclick="pickAnswer(${i},${j})">
+        <span class="opt-label">${labels[j]}</span>
+        <span>${opt}</span>
+      </button>`;
+    });
+    html += `</div>`;
+    html += `<div class="q-feedback" id="fb-${i}"></div>`;
+    html += `</div>`;
+  });
+
+  box.innerHTML = html;
+  renderDistBar();
+}
+
+function renderDistBar() {
+  // Hitung distribusi kunci jawaban yang terlihat
+  const counts = [0, 0, 0, 0, 0];
+  questions.forEach(q => counts[q.answer]++);
+  const total = questions.length;
+  const colors = ["var(--teal)", "#0284c7", "var(--gold)", "var(--rose)", "#8b5cf6"];
+  let html = "";
+  counts.forEach((c, i) => {
+    html += `<div style="width:${(c / total * 100)}%;background:${colors[i]}"></div>`;
+  });
+  document.getElementById("dist-bar").innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════
+// LOGIKA JAWAB
+// ═══════════════════════════════════════════════════════
+function pickAnswer(qi, oi) {
+  if (answered[qi]) return;
+  answered[qi] = true;
+
+  const q = questions[qi];
+  const isCorrect = (oi === q.answer);
+  if (isCorrect) scoreCorrect++; else scoreWrong++;
+
+  const labels = ["A", "B", "C", "D", "E"];
+
+  q.options.forEach((_, j) => {
+    const btn = document.getElementById(`opt-${qi}-${j}`);
+    btn.disabled = true;
+    if (j === q.answer) {
+      btn.classList.add("correct");
+    } else if (j === oi && !isCorrect) {
+      btn.classList.add("wrong");
+    } else {
+      btn.classList.add("dimmed");
+    }
+  });
+
+  const card = document.getElementById(`qcard-${qi}`);
+  card.classList.add(isCorrect ? "answered-correct" : "answered-wrong");
+
+  const fb = document.getElementById(`fb-${qi}`);
+  fb.className = "q-feedback show " + (isCorrect ? "fb-correct" : "fb-wrong");
+  if (isCorrect) {
+    fb.innerHTML = `<strong>✅ Benar! Jawaban kamu tepat.</strong>${q.explanation}`;
+  } else {
+    fb.innerHTML = `<strong>❌ Salah. Jawaban yang benar adalah <u>${labels[q.answer]}</u>.</strong>${q.explanation}`;
+  }
+
+  updateProgress();
+
+  if (answered.every(a => a)) {
+    setTimeout(() => openResult(), 900);
+  }
+}
+
+function updateProgress() {
+  const done = answered.filter(a => a).length;
+  const total = questions.length;
+  const pct = Math.round((done / total) * 100);
+  document.getElementById("prog-label").textContent = `${done} dari ${total} soal dijawab`;
+  document.getElementById("prog-fill").style.width = pct + "%";
+  document.getElementById("chip-g").textContent = "✅ " + scoreCorrect;
+  document.getElementById("chip-r").textContent = "❌ " + scoreWrong;
+}
+
+// ═══════════════════════════════════════════════════════
+// MODAL HASIL
+// ═══════════════════════════════════════════════════════
+function openResult() {
+  if (!answered.every(a => a)) return;
+
+  const nama = document.getElementById("inp-nama").value.trim() || "Peserta";
+  const kelas = document.getElementById("inp-kelas").value.trim();
+  const pct = Math.round((scoreCorrect / questions.length) * 100);
+
+  let emoji, predikat, prColor;
+  if (pct >= 90)      { emoji = "🏆"; predikat = "Sangat Baik (A)"; prColor = "#22c55e"; }
+  else if (pct >= 75) { emoji = "⭐"; predikat = "Baik (B)"; prColor = "#0d9488"; }
+  else if (pct >= 60) { emoji = "👍"; predikat = "Cukup (C)"; prColor = "#f59e0b"; }
+  else if (pct >= 40) { emoji = "📚"; predikat = "Kurang (D)"; prColor = "#f97316"; }
+  else                { emoji = "💪"; predikat = "Sangat Kurang (E)"; prColor = "#f43f5e"; }
+
+  let motivasi;
+  if (pct >= 90) {
+    motivasi = `<strong>Masya Allah, luar biasa!</strong> Kamu sudah menguasai materi Bab 1 dengan sangat baik. Pemahaman yang kokoh seperti ini akan menjadi bekal berharga untuk bab-bab selanjutnya. Terus pertahankan semangat belajarmu, ya!`;
+  } else if (pct >= 75) {
+    motivasi = `<strong>Hebat sekali!</strong> Pemahaman kamu terhadap materi Bab 1 sudah sangat baik. Masih ada sedikit yang bisa diperbaiki, tapi hasil ini menunjukkan kerja kerasmu tidak sia-sia. Ayo kejar kesempurnaan di bab berikutnya!`;
+  } else if (pct >= 60) {
+    motivasi = `<strong>Cukup baik!</strong> Kamu sudah menunjukkan pemahaman dasar yang cukup. Ada beberapa materi yang perlu diperdalam lagi — coba baca kembali penjelasan di buku paket dan ulangi latihan ini. Pasti skor kamu akan naik!`;
+  } else if (pct >= 40) {
+    motivasi = `<strong>Jangan berkecil hati!</strong> Setiap proses belajar butuh waktu dan kesabaran. Coba pelajari kembali materi Bab 1 secara perlahan, pahami setiap ayat dan hadis yang dibahas, lalu kerjakan ulang latihan ini. Kamu pasti bisa lebih baik!`;
+  } else {
+    motivasi = `<strong>Tetap semangat!</strong> Belajar itu perjalanan, bukan tujuan. Mulai dari membaca ulang materi Bab 1 di buku paket, diskusikan dengan teman atau guru, lalu coba lagi latihan soal ini. Setiap usaha tidak akan pernah mengkhianati hasil. Semangat! 💪`;
+  }
+
+  document.getElementById("r-emoji").textContent = emoji;
+  document.getElementById("r-name").textContent = nama;
+  document.getElementById("r-class").textContent = kelas ? "Kelas " + kelas : "";
+  document.getElementById("r-score").textContent = pct;
+  document.getElementById("r-correct").textContent = scoreCorrect;
+  document.getElementById("r-wrong").textContent = scoreWrong;
+
+  const pr = document.getElementById("r-predikat");
+  pr.textContent = predikat;
+  pr.style.background = prColor + "22";
+  pr.style.color = prColor;
+
+  document.getElementById("r-motivasi").innerHTML = motivasi;
+
+  // Confetti untuk skor >= 75
+  const confettiBox = document.getElementById("confetti-box");
+  confettiBox.innerHTML = "";
+  if (pct >= 75) {
+    const colors = ["#22c55e", "#f59e0b", "#0d9488", "#f43f5e", "#3b82f6", "#a855f7", "#ec4899"];
+    for (let c = 0; c < 50; c++) {
+      const el = document.createElement("div");
+      el.className = "confetti";
+      el.style.left = Math.random() * 100 + "%";
+      el.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+      el.style.animationDelay = (Math.random() * 2) + "s";
+      el.style.animationDuration = (2 + Math.random() * 2.5) + "s";
+      const size = 6 + Math.random() * 6;
+      el.style.width = size + "px";
+      el.style.height = size + "px";
+      el.style.borderRadius = Math.random() > 0.5 ? "50%" : "2px";
+      confettiBox.appendChild(el);
+    }
+  }
+
+  document.getElementById("result-overlay").classList.add("show");
+}
+
+function closeResult() {
+  document.getElementById("result-overlay").classList.remove("show");
+  document.getElementById("btn-show-result").style.display = "block";
+}
+
+function restart() {
+  scoreCorrect = 0;
+  scoreWrong = 0;
+
+  // Reset input
+  document.getElementById("inp-nama").value = "";
+  document.getElementById("inp-kelas").value = "";
+  document.getElementById("result-overlay").classList.remove("show");
+  document.getElementById("btn-show-result").style.display = "none";
+
+  // Acak ulang soal
+  shuffleNoAdjacent(questions);
+
+  // Reset state jawaban
+  answered = new Array(questions.length).fill(false);
+
+  updateProgress();
+  renderAll();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+// ═══════════════════════════════════════════════════════
+// INISIALISASI
+// ═══════════════════════════════════════════════════════
+shuffleNoAdjacent(questions);
+answered = new Array(questions.length).fill(false);
+renderAll();
+updateProgress();
+</script>
 </body>
 </html>
