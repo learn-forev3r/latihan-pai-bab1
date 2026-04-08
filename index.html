@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Quiz Application</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .question { margin-bottom: 20px; }
+        .options { margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>Interactive Quiz Application</h1>
+    <div class="question">
+        <h2>Question 1: What is the capital of France?</h2>
+        <div class="options">
+            <button onclick="checkAnswer('A')">A) London</button>
+            <button onclick="checkAnswer('B')">B) Paris</button>
+            <button onclick="checkAnswer('C')">C) Rome</button>
+        </div>
+    </div>
+    <script>
+        function checkAnswer(option) {
+            if (option === 'B') {
+                alert('Correct Answer!');
+            } else {
+                alert('Wrong Answer!');
+            }
+        }
+    </script>
+</body>
+</html>
